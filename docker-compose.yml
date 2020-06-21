@@ -1,0 +1,50 @@
+version: "3.7"
+x-logging: &default-logging
+  options:
+    max-size: "200k"
+    max-file: "5"
+  driver: json-file
+
+services:
+  java-spring:
+    image: openjdk:8
+    container_name: java-spring
+    restart: always
+    tty: true
+    stdin_open: true
+    working_dir: /work
+    volumes:
+      - ./src:/work/src
+    logging: *default-logging
+    ports:
+      - 8888:8888
+    networks:
+      - java-spring
+
+  db:
+    image: postgres:latest
+    restart: always
+    container_name: java-postgres
+    stdin_open: true
+    tty: true
+    environment:
+      POSTGRES_DB: testdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    networks:
+      - java-spring
+  adminer:
+    image: adminer:latest
+    restart: always
+    container_name: java-adminer
+    stdin_open: true
+    tty: true
+    depends_on:
+      - db
+    ports:
+      - 8591:8080
+    networks:
+      - java-spring
+networks:
+  java-spring:
+    name: java-spring
